@@ -407,10 +407,6 @@
   margin: 0.5rem;
   max-width: fit-content;
   cursor: pointer;
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
 }
 
 :global(html.dark) .interestsCard {

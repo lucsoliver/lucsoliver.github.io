@@ -38,7 +38,7 @@ const resources = {
           film: "Sci-fi Films",
           anime: "Anime",
           music: "Music",
-          dorama: "Asian Dramas",
+          dorama: "K-drama",
         },
         curriculum: "Download CV",
         cvTitle: "Curriculum",
@@ -105,6 +105,7 @@ const resources = {
         linkedin: "LinkedIn",
         copyEmail: "Copy Email",
         emailCopied: "Email copied to clipboard!",
+        copyFailed: "Failed to copy",
       },
       links: {
         dev: "Front-end Developer",
@@ -288,6 +289,7 @@ const resources = {
         linkedin: "LinkedIn",
         copyEmail: "Copiar E-mail",
         emailCopied: "E-mail copiado para a área de transferência!",
+        copyFailed: "Não foi possível copiar",
       },
       links: {
         dev: "Desenvolvedor Front-end ",

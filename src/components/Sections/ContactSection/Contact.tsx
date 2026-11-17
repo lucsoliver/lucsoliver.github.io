@@ -1,14 +1,12 @@
-import { useEffect, useRef, useState } from "react";
-import { Copy } from "lucide-react";
+import { Copy, Check, X } from "lucide-react";
 import { FaLinkedinIn } from "react-icons/fa6";
-
 import { useTranslation } from "react-i18next";
 
 import Tooltip from "../../Tooltip/Tooltip";
+import { useCopyToClipboard } from "../../../hooks/useCopyToClipboard";
 import styles from "./Contact.module.css";
 
 const emailAddress = "lucasolv.dev@gmail.com";
-const COPY_FEEDBACK_MS = 1500;
 
 const contactMethods = [
   {
@@ -21,56 +19,49 @@ const contactMethods = [
 
 function Contact() {
   const { t } = useTranslation();
-  const [copied, setCopied] = useState(false);
-  const copyTimerRef = useRef<number | undefined>(undefined);
+  const { status, copy } = useCopyToClipboard();
 
-  useEffect(() => {
-    return () => {
-      if (copyTimerRef.current) {
-        window.clearTimeout(copyTimerRef.current);
-      }
-    };
-  }, []);
+  const isCopied = status === "copied";
+  const isError = status === "error";
 
-  const handleCopyEmail = async () => {
-    try {
-      await navigator.clipboard.writeText(emailAddress);
-    } catch {
-      // ignora falha do clipboard e mantém o feedback visual
-    }
+  const tooltipLabel = isCopied
+    ? t("contact.emailCopied")
+    : isError
+      ? t("contact.copyFailed", { defaultValue: "Não foi possível copiar" })
+      : t("contact.copyEmail");
 
-    setCopied(true);
+  const tooltipBackground = isCopied
+    ? "#22c55e"
+    : isError
+      ? "#ef4444"
+      : undefined;
 
-    if (copyTimerRef.current) {
-      window.clearTimeout(copyTimerRef.current);
-    }
-
-    copyTimerRef.current = window.setTimeout(() => {
-      setCopied(false);
-    }, COPY_FEEDBACK_MS);
-  };
+  const StatusIcon = isCopied ? Check : isError ? X : Copy;
 
   return (
     <section id="contact" className={styles.section}>
       <div className={styles.container}>
         <span className={styles.subtitle}>{t("contact.subtitle")}</span>
         <h2 className={styles.title}>{t("contact.title")}</h2>
+
         <div className={styles.contactBar}>
           <div className={styles.contactItemWrap}>
             <Tooltip
-              label={copied ? t("contact.emailCopied") : t("contact.copyEmail")}
-              background={copied ? "#22c55e" : undefined}
+              label={tooltipLabel}
+              background={tooltipBackground}
               size="md"
-              open={copied ? true : undefined}
+              open={status !== "idle" ? true : undefined}
             >
               <button
                 type="button"
-                className={`${styles.emailCopyButton} ${copied ? styles.emailCopyButtonActive : ""}`}
-                onClick={handleCopyEmail}
+                className={`${styles.emailCopyButton} ${
+                  isCopied ? styles.emailCopyButtonActive : ""
+                }`}
+                onClick={() => copy(emailAddress)}
                 aria-label={`${t("contact.copyEmail")}: ${emailAddress}`}
               >
-                <Copy
-                  className={`${styles.icon} ${copied ? styles.iconActive : ""}`}
+                <StatusIcon
+                  className={`${styles.icon} ${isCopied ? styles.iconActive : ""}`}
                   aria-hidden="true"
                 />
               </button>

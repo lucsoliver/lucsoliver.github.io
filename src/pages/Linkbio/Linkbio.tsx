@@ -1,47 +1,25 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import LinksBackground from "../../components/illustrations/LinksBackground";
 import Tooltip from "../../components/Tooltip/Tooltip";
 import { socialLinks } from "../../data/socials";
+import { useCopyToClipboard } from "../../hooks/useCopyToClipboard";
 import styles from "./Linkbio.module.css";
 
 const cvPdf = "/docs/CV_Lucas_Oliveira_Novembro2026.pdf";
 const cvPdfEN = "/docs/CV_Lucas_Oliveira_October2026.pdf";
 
-const COPY_FEEDBACK_MS = 1500;
-
 function Links() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const [copied, setCopied] = useState(false);
-  const copyTimerRef = useRef<number | undefined>(undefined);
+  const { status, copy } = useCopyToClipboard();
+  const [copiedLabel, setCopiedLabel] = useState<string | null>(null);
 
-  useEffect(() => {
-    return () => {
-      if (copyTimerRef.current) {
-        window.clearTimeout(copyTimerRef.current);
-      }
-    };
-  }, []);
-
-  const handleCopyDiscordName = async (username: string) => {
-    try {
-      await navigator.clipboard.writeText(username);
-    } catch {
-      // ignora falha do clipboard e mantém o feedback visual
-    }
-
-    setCopied(true);
-
-    if (copyTimerRef.current) {
-      window.clearTimeout(copyTimerRef.current);
-    }
-
-    copyTimerRef.current = window.setTimeout(() => {
-      setCopied(false);
-    }, COPY_FEEDBACK_MS);
+  const handleCopy = async (label: string, text: string) => {
+    setCopiedLabel(label);
+    await copy(text);
   };
 
   return (
@@ -64,7 +42,6 @@ function Links() {
         </h2>
         <span className={styles.dev}>{t("links.dev")}</span>
         <span className={styles.stack}>{t("links.stack")}</span>
-
         <div className={styles.socialsContainer}>
           {socialLinks.map((project) => {
             const Icon = project.icon;
@@ -76,12 +53,27 @@ function Links() {
             );
 
             if (project.copyText) {
+              const isActive =
+                copiedLabel === project.label && status !== "idle";
+              const isCopied = isActive && status === "copied";
+              const isError = isActive && status === "error";
+
+              const label = isCopied
+                ? t("links.copied", { defaultValue: "Copiado!" })
+                : isError
+                  ? t("links.copyFailed", {
+                      defaultValue: "Não foi possível copiar",
+                    })
+                  : project.label;
+
               return (
                 <Tooltip
                   key={project.label}
-                  label={copied ? "Copiado!" : project.label}
-                  background={copied ? "#22c55e" : undefined}
-                  open={copied ? true : undefined}
+                  label={label}
+                  background={
+                    isCopied ? "#22c55e" : isError ? "#ef4444" : undefined
+                  }
+                  open={isActive ? true : undefined}
                   position="bottom"
                   showArrow={false}
                 >
@@ -90,7 +82,7 @@ function Links() {
                     className={styles.linkIconButton}
                     aria-label={project.label}
                     draggable="false"
-                    onClick={() => handleCopyDiscordName(project.copyText!)}
+                    onClick={() => handleCopy(project.label, project.copyText!)}
                   >
                     {socialContent}
                   </button>

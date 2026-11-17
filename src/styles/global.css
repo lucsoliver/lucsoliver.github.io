@@ -158,14 +158,6 @@ html.dark .title {
   color: #fff;
 }
 
-.stylizedTitle,
-.stylizedName {
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-}
-
 .stylizedTitle:hover {
   background: linear-gradient(
     to right,
